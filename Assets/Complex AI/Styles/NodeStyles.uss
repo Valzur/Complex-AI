@@ -1,0 +1,25 @@
+/* CONTAINERS */
+
+.ds-node_extension-container
+{
+	background-color: #1D1D1E;
+	padding: 8px;
+}
+
+.ds-node_custom-data-containers
+{
+	background-color: #212325;
+	border-radius: 4px;
+	padding: 8px;
+}
+
+/* INPUTS */
+
+.ds-node_textfield > .unity-text-field_input
+{
+	background-color: #1D1D1E;
+	border-color: #27292C;
+	border-radius: 4px;
+	min-width: 160px;
+	padding: 8px;
+}

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
+[CreateAssetMenu]
 public class Brain : ScriptableObject
 {
-	public Module[] Modules;
+	public List<Module> Modules = new();
 	public Memorizer Memory;
+	public List<Module> UnconnectedModules { get; set; } = new();
 
 	public void InitializeModules()
 	{

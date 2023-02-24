@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Module
+public abstract class Module: INode
 {
 	protected SubModule[] SubModules;
 	protected Memorizer Memory;
-	
+	public Vector2 Position { get; set; }
+	public List<SubModule> UnconnectedSubModules { get; set; } = new();
+
 	public void Initialize(Memorizer Memorizer)
 	{
 		this.Memory = Memorizer;

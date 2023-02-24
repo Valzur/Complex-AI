@@ -14,7 +14,8 @@ public class BrainGraphViewEditor : GraphViewEditorWindow
 
 	void OnEnable()
 	{
-		Selection.selectionChanged += SwitchActiveBrain;	
+		Selection.selectionChanged += SwitchActiveBrain;
+		SwitchActiveBrain();	
 	}
 
 	void OnDisable()
@@ -34,12 +35,19 @@ public class BrainGraphViewEditor : GraphViewEditorWindow
 			if(currentBrainGraphView is not null) 
 				rootVisualElement.Remove(currentBrainGraphView);
 
+			if(brainMono.brain is null)
+			{
+				Debug.LogError("Found No Brain Data");
+				return;
+			}
+
 			titleContent = new GUIContent("Selected Brain: " + Selection.activeGameObject.name);
 
 			currentBrainGraphView = new BrainGraphView(brainMono.brain);
 			rootVisualElement.Add(currentBrainGraphView);
 			currentBrainGraphView.StretchToParentSize();
 		}
+
 	}
 	
 }

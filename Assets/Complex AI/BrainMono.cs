@@ -5,7 +5,7 @@ using UnityEngine;
 public class BrainMono: MonoBehaviour
 {
 	[SerializeField] float updateRate;
-	[SerializeField] public Brain brain { get; private set; }
+	public Brain brain;
 	Coroutine UpdateRoutineReference;
 
 	void Awake() => brain.InitializeModules();
