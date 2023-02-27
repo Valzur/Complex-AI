@@ -49,6 +49,7 @@ public class BrainGraphView : GraphView
 			ModuleGraphViewer.ModuleNodeType type = ModuleGraphViewer.ModuleNodeType.Mainstream;
 
 			ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(brain.Modules[i], type);
+			moduleGraphViewer.SetMainStatus(true);
 			AddElement(moduleGraphViewer);
 		}
 
@@ -57,6 +58,7 @@ public class BrainGraphView : GraphView
 			ModuleGraphViewer.ModuleNodeType type = ModuleGraphViewer.ModuleNodeType.Side;
 
 			ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(brain.UnconnectedModules[i], type);
+			moduleGraphViewer.SetMainStatus(false);
 			AddElement(moduleGraphViewer);
 		}
 	}
@@ -77,7 +79,7 @@ public class BrainGraphView : GraphView
 		gridBackground.StretchToParentSize();
 
 		SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-
+		
 		this.AddManipulator(new ContentDragger());
 		this.AddManipulator(new ContentZoomer());
 		this.AddManipulator(new EdgeManipulator());
@@ -111,6 +113,21 @@ public class BrainGraphView : GraphView
 	{
 		Module module = Activator.CreateInstance(type) as Module;
 		ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(module);
+		moduleGraphViewer.Initialize(position);
+		
+		if(this.graphElements.Count() == 0)
+		{
+			brain.Modules.Add(module);
+		}
+		else
+		{
+			brain.UnconnectedModules.Add(module);
+		}
+		EditorUtility.SetDirty(brain);
+	
+		moduleGraphViewer.SetMainStatus(this.graphElements.Count() == 0);
+		
 		AddElement(moduleGraphViewer);
+		graphViewChanged += moduleGraphViewer.OnGraphViewChanged;
 	}
 }

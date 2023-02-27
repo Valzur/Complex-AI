@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-public static class BrainUitlity
+public static partial class Uitlity
 {
 	public static void Connect(this Brain brain, Module thisModule, Module thatModule)
 	{
