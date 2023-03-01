@@ -6,6 +6,7 @@ using UnityEngine;
 [CreateAssetMenu]
 public class Brain : ScriptableObject
 {
+	public int test;
 	public List<Module> Modules = new();
 	public Memorizer Memory;
 	public List<Module> UnconnectedModules { get; set; } = new();
@@ -25,4 +26,5 @@ public class Brain : ScriptableObject
 			module.Process();
 		}
 	}
+
 }

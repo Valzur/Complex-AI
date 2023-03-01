@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Module: INode
+[System.Serializable]
+public abstract class Module: ScriptableObject, INode
 {
 	protected SubModule[] SubModules;
 	protected Memorizer Memory;

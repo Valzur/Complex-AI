@@ -1,9 +1,10 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 
-public class ModuleGraphViewer : Node
+public class ModuleGraphViewer : NodeBase
 {
 	public enum ModuleNodeType
 	{
@@ -21,25 +22,27 @@ public class ModuleGraphViewer : Node
 		Draw();
 	}
 
-	public void Initialize(Vector2 position)
+	public void Initialize(Vector2 position) => SetPosition(new Rect(position, Vector2.zero));
+
+	public override void RegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
-		
-		SetPosition(new Rect(position, Vector2.zero));
+		brainGraphView.onEdgeCreatedCallback.AddListener(HandleCreatedEdge);
+		brainGraphView.RegisterOnElementRemovedCallback<Edge>(HandleDisconnectedEdge);
+		brainGraphView.RegisterOnElementMovedCallback<ModuleGraphViewer>(HandlePositionUpdate);
 	}
 
-	public GraphViewChange OnGraphViewChanged(GraphViewChange changes)
+	public override void UnRegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
-		GraphViewChange modifiedChanges = new()
-		{
-			edgesToCreate = changes.edgesToCreate,
-			elementsToRemove = changes.elementsToRemove,
-			movedElements = changes.movedElements,
-			moveDelta = changes.moveDelta
-		};
+		brainGraphView.UnRegisterOnElementMovedCallback<ModuleGraphViewer>(HandlePositionUpdate);
+		brainGraphView.UnRegisterOnElementRemovedCallback<Edge>(HandleDisconnectedEdge);
+		brainGraphView.onEdgeCreatedCallback.RemoveListener(HandleCreatedEdge);
+	}
 
-		if(modifiedChanges.movedElements is not null)
+	public override GraphViewChange OnGraphViewChanged(GraphViewChange changes)
+	{
+		if(changes.movedElements is not null)
 		{
-			foreach (var elementToMove in modifiedChanges.movedElements)
+			foreach (var elementToMove in changes.movedElements)
 			{
 				if(elementToMove == this)
 				{
@@ -48,74 +51,7 @@ public class ModuleGraphViewer : Node
 			}
 		}
 
-		if(modifiedChanges.elementsToRemove is not null)
-		{
-			foreach (var elementToRemove in modifiedChanges.elementsToRemove)
-			{
-				if(elementToRemove is not Edge edge)
-				{
-					continue;
-				}
-
-				if(edge.output.parent.parent.parent.parent.parent is not ModuleGraphViewer moduleGraphViewer)
-				{
-					continue;
-				}
-
-				ModuleGraphViewer currentModuleGraphViewer = moduleGraphViewer;
-				while(moduleGraphViewer is not null)
-				{
-					moduleGraphViewer.outputContainer.FirstChildOfType<Port>().parent.parent.parent.parent.parent as ;
-				}
-				
-			}
-		}
-
-		if(modifiedChanges.edgesToCreate is not null)
-		{
-			foreach (var edge in modifiedChanges.edgesToCreate)
-			{
-				VisualElement inputVisualElement = edge.input.parent;
-				VisualElement outputVisualElement = edge.output.parent;
-				if(inputVisualElement != inputContainer)
-				{
-					goto SecondCheck;
-				}
-
-				if(outputVisualElement.parent.parent.parent.parent as ModuleGraphViewer is null)
-				{
-					goto SecondCheck;
-				}
-
-				if(!(outputVisualElement.parent.parent.parent.parent as ModuleGraphViewer).IsMain)
-				{
-					goto SecondCheck;
-				}
-
-				SetMainStatus(true);
-				continue;
-
-				SecondCheck:
-				if(outputVisualElement != inputContainer)
-				{
-					continue;
-				}
-
-				if(inputVisualElement.parent.parent.parent.parent as ModuleGraphViewer is null)
-				{
-					continue;
-				}
-
-				if(!(inputVisualElement.parent.parent.parent.parent as ModuleGraphViewer).IsMain)
-				{
-					continue;
-				}
-				
-				SetMainStatus(true);
-			}
-		}
-
-		return modifiedChanges;
+		return changes;
 	}
 
 	void Draw()
@@ -167,4 +103,85 @@ public class ModuleGraphViewer : Node
 		titleContainer.Q<Label>().style.color = IsMain? Color.black : labelColor;
 	}
 
+	public void HandleCreatedEdge(Edge edge)
+	{
+		VisualElement inputVisualElement = edge.input.parent;
+		VisualElement outputVisualElement = edge.output.parent;
+		if(inputVisualElement != inputContainer)
+		{
+			goto SecondCheck;
+		}
+
+		if(outputVisualElement.parent.parent.parent.parent is not ModuleGraphViewer outputGraphViewer)
+		{
+			goto SecondCheck;
+		}
+
+		if(!outputGraphViewer.IsMain)
+		{
+			goto SecondCheck;
+		}
+
+		SetMainStatus(true);
+		brain.Connect(Module, outputGraphViewer.Module);
+		return;
+
+		SecondCheck:
+		if(outputVisualElement != inputContainer)
+		{
+			return;
+		}
+
+		if(inputVisualElement.parent.parent.parent.parent is not ModuleGraphViewer inputGraphViewer)
+		{
+			return;
+		}
+
+		if(!inputGraphViewer.IsMain)
+		{
+			return;
+		}
+		
+		SetMainStatus(true);
+		brain.Connect(inputGraphViewer.Module, Module);
+	}
+
+	public void HandleDisconnectedEdge(GraphElement elementToRemove)
+	{
+		if(elementToRemove is not Edge edge)
+		{
+			return;
+		}
+
+		if(edge.output.parent.parent.parent.parent.parent is not ModuleGraphViewer moduleGraphViewer)
+		{
+			return;
+		}
+
+		if(moduleGraphViewer != this)
+		{
+			return;
+		}
+
+		ModuleGraphViewer connectedModuleGraphViewer = moduleGraphViewer;
+		int flag = 0;
+		while(connectedModuleGraphViewer is not null)
+		{
+			connectedModuleGraphViewer.SetMainStatus(false);
+			connectedModuleGraphViewer = connectedModuleGraphViewer.outputContainer.FirstChildOfType<Port>().connections.ElementAt(0).output.parent.parent.parent.parent.parent as ModuleGraphViewer;
+			flag ++;
+			if(flag >= 100) break;
+			Debug.Log("Ayo");
+		}
+	}
+
+	public void HandlePositionUpdate(GraphElement graphElement)
+	{
+		if(graphElement != this)
+		{
+			return;
+		}
+
+		Module.Position = GetPosition().position;
+	}
 }
