@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,12 +6,14 @@ using UnityEngine;
 [System.Serializable]
 public abstract class Module: ScriptableObject, INode
 {
-	protected SubModule[] SubModules;
+	public virtual Type SubModuleType => typeof(SubModule);
+	public List<SubModule> SubModules = new();
 	protected Memorizer Memory;
 	public Vector2 Position { get; set; }
 
 	public void Initialize(Memorizer Memorizer)
 	{
+		this.name = GetType().ToString();
 		this.Memory = Memorizer;
 		Setup();
 	}

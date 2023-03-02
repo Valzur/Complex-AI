@@ -5,13 +5,20 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 
-public class BrainGraphViewEditor : GraphViewEditorWindow
+public class BrainGraphViewEditorWindow : GraphViewEditorWindow
 {
 	BrainGraphView currentBrainGraphView;
 
 	[MenuItem("Complex AI/View")]
-	public static void Open() => GetWindow<BrainGraphViewEditor>("No Brain Selected");
-
+	public static void Open() => GetWindow<BrainGraphViewEditorWindow>();
+	public static void Open(Brain brain)
+	{
+		BrainGraphViewEditorWindow editor = GetWindow<BrainGraphViewEditorWindow>();
+		BrainGraphView currentBrainGraphView = new BrainGraphView(brain);
+		editor.rootVisualElement.Add(currentBrainGraphView);
+		currentBrainGraphView.StretchToParentSize();
+	}
+	
 	void OnEnable()
 	{
 		Selection.selectionChanged += SwitchActiveBrain;
@@ -47,7 +54,6 @@ public class BrainGraphViewEditor : GraphViewEditorWindow
 			rootVisualElement.Add(currentBrainGraphView);
 			currentBrainGraphView.StretchToParentSize();
 		}
-
 	}
 	
 }

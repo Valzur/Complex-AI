@@ -123,6 +123,21 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f84f2257b72a624c992417fad19e21e, type: 3}
+  m_Name: Brain
+  m_EditorClassIdentifier: 
+  Modules:
+  - {fileID: 0}
+  unconnectedModules: []
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,4 +465,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updateRate: 0
-  brain: {fileID: 11400000, guid: 43eae30aea25b0544b3b260def6b0d4b, type: 2}
+  brain: {fileID: 11400000}

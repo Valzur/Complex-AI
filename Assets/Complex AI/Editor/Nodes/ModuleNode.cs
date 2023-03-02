@@ -1,11 +1,13 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 
-public class ModuleGraphViewer : NodeBase
+public class ModuleNode : NodeBase
 {
+	BrainGraphView brainGraph;
 	public enum ModuleNodeType
 	{
 		Mainstream,
@@ -14,26 +16,28 @@ public class ModuleGraphViewer : NodeBase
 	
 	public bool IsMain { get; private set; }
 	public Module Module { get; private set; }
+	VisualElement subModuleContainer;
 
-	public ModuleGraphViewer(Module module, ModuleNodeType type = ModuleNodeType.Mainstream)
+	public ModuleNode(Module module, ModuleNodeType type = ModuleNodeType.Mainstream)
 	{
 		this.Module = module;
 		Initialize(module.Position);
+		this.AddManipulator(CreateContextualMenu());
 		Draw();
 	}
 
-	public void Initialize(Vector2 position) => SetPosition(new Rect(position, Vector2.zero));
-
 	public override void RegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
+		brainGraph = brainGraphView;
 		brainGraphView.onEdgeCreatedCallback.AddListener(HandleCreatedEdge);
 		brainGraphView.RegisterOnElementRemovedCallback<Edge>(HandleDisconnectedEdge);
-		brainGraphView.RegisterOnElementMovedCallback<ModuleGraphViewer>(HandlePositionUpdate);
+		brainGraphView.RegisterOnElementMovedCallback<ModuleNode>(HandlePositionUpdate);
+		brainGraphView.RegisterOnElementRemovedCallback<SubModuleNode>(HandleRemovedSubModule);
 	}
-
 	public override void UnRegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
-		brainGraphView.UnRegisterOnElementMovedCallback<ModuleGraphViewer>(HandlePositionUpdate);
+		brainGraphView.UnRegisterOnElementRemovedCallback<SubModuleNode>(HandleRemovedSubModule);
+		brainGraphView.UnRegisterOnElementMovedCallback<ModuleNode>(HandlePositionUpdate);
 		brainGraphView.UnRegisterOnElementRemovedCallback<Edge>(HandleDisconnectedEdge);
 		brainGraphView.onEdgeCreatedCallback.RemoveListener(HandleCreatedEdge);
 	}
@@ -57,26 +61,35 @@ public class ModuleGraphViewer : NodeBase
 	void Draw()
 	{
 		title = Module.GetType().ToString();
-		AddInputPort();
 
 		Button addPortButton = new Button{ text = "Add SubModule" };
-		addPortButton.clicked += AddInputPort;
-		mainContainer.Insert(1, addPortButton);
+		addPortButton.clicked += () => AddInputPort();
+		Add(addPortButton);
+		subModuleContainer = new Foldout();
+		Add(subModuleContainer);
+
+		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(Module));
+		inputPort.portName = string.Empty;
+		inputContainer.Add(inputPort);
+		VisualElement separator = new();
+		separator.style.display = DisplayStyle.Flex;
+		inputContainer.Add(separator);
 
 		Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(Module));
 		outputPort.portName = string.Empty;
 		outputContainer.Add(outputPort);
 	}
 
-	void AddInputPort()
+	public Port AddInputPort()
 	{
-		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(Module));
+		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, Module.SubModuleType);
 		inputPort.portName = string.Empty;
 		Button deletePortButton = new Button(){ text = "X" };
 		inputPort.Add(deletePortButton);
 		deletePortButton.clicked += () => RemoveInputPort(inputPort);
 
-		inputContainer.Add(inputPort);
+		subModuleContainer.Add(inputPort);
+		return inputPort;
 	}
 
 	void RemoveInputPort(Port port)
@@ -91,7 +104,7 @@ public class ModuleGraphViewer : NodeBase
 			edge.parent.Remove(edge);
 		}
 
-		inputContainer.Remove(port);
+		port.parent.Remove(port);
 	}
 
 	public void SetMainStatus(bool isMain)
@@ -112,7 +125,7 @@ public class ModuleGraphViewer : NodeBase
 			goto SecondCheck;
 		}
 
-		if(outputVisualElement.parent.parent.parent.parent is not ModuleGraphViewer outputGraphViewer)
+		if(outputVisualElement.parent.parent.parent.parent is not ModuleNode outputGraphViewer)
 		{
 			goto SecondCheck;
 		}
@@ -132,7 +145,7 @@ public class ModuleGraphViewer : NodeBase
 			return;
 		}
 
-		if(inputVisualElement.parent.parent.parent.parent is not ModuleGraphViewer inputGraphViewer)
+		if(inputVisualElement.parent.parent.parent.parent is not ModuleNode inputGraphViewer)
 		{
 			return;
 		}
@@ -153,7 +166,7 @@ public class ModuleGraphViewer : NodeBase
 			return;
 		}
 
-		if(edge.output.parent.parent.parent.parent.parent is not ModuleGraphViewer moduleGraphViewer)
+		if(edge.output.parent.parent.parent.parent.parent is not ModuleNode moduleGraphViewer)
 		{
 			return;
 		}
@@ -163,12 +176,12 @@ public class ModuleGraphViewer : NodeBase
 			return;
 		}
 
-		ModuleGraphViewer connectedModuleGraphViewer = moduleGraphViewer;
+		ModuleNode connectedModuleGraphViewer = moduleGraphViewer;
 		int flag = 0;
 		while(connectedModuleGraphViewer is not null)
 		{
 			connectedModuleGraphViewer.SetMainStatus(false);
-			connectedModuleGraphViewer = connectedModuleGraphViewer.outputContainer.FirstChildOfType<Port>().connections.ElementAt(0).output.parent.parent.parent.parent.parent as ModuleGraphViewer;
+			connectedModuleGraphViewer = connectedModuleGraphViewer.outputContainer.FirstChildOfType<Port>().connections.ElementAt(0).output.parent.parent.parent.parent.parent as ModuleNode;
 			flag ++;
 			if(flag >= 100) break;
 			Debug.Log("Ayo");
@@ -183,5 +196,71 @@ public class ModuleGraphViewer : NodeBase
 		}
 
 		Module.Position = GetPosition().position;
+	}
+
+	IManipulator CreateContextualMenu()
+	{
+		ContextualMenuManipulator contextualMenuManipulator = new ContextualMenuManipulator(
+			menuEvent => 
+			{
+				foreach (var type in typeof(SubModule).Assembly.GetTypes())
+				{
+					if(type.IsAbstract)
+					{
+						continue;
+					}
+
+					if(!type.IsSubclassOf(Module.SubModuleType))
+					{
+						continue;
+					}
+
+					if(brainGraph.ContainsElementOfType(type))
+					{
+						continue;
+					}
+
+					menuEvent.menu.AppendAction($"SubModules/{type.ToString()}", (action) => CreateSubModuleFromType(type, action.eventInfo.localMousePosition));
+				}
+			}
+		);
+
+		return contextualMenuManipulator;
+	}
+
+	void CreateSubModuleFromType(Type type, Vector2 position)
+	{
+		SubModule subModule = ScriptableObject.CreateInstance(type) as SubModule;
+		AssetDatabase.AddObjectToAsset(subModule, brain);
+		SubModuleNode subModuleNode = new SubModuleNode(subModule);
+		subModuleNode.SetBrain(brain);
+		subModuleNode.Initialize(position);
+		
+		brainGraph.AddElement(subModuleNode);
+		EnableSubModule(subModuleNode);
+	}
+
+	public void EnableSubModule(SubModuleNode subModuleNode)
+	{
+		subModuleNode.OnEnable();
+		subModuleNode.RegisterGraphCallbacks(brainGraph);
+		brainGraph.graphViewChanged += subModuleNode.OnGraphViewChanged;
+	}
+
+	void DisableSubModule(SubModuleNode subModuleNode)
+	{
+		brainGraph.graphViewChanged -= subModuleNode.OnGraphViewChanged;
+		subModuleNode.UnRegisterGraphCallbacks(brainGraph);
+		subModuleNode.OnDisable();
+	}
+
+	void HandleRemovedSubModule(GraphElement graphElement)
+	{
+		if(graphElement.GetType() != Module.SubModuleType)
+		{
+			return;
+		}
+
+		DisableSubModule(graphElement as SubModuleNode);
 	}
 }

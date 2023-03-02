@@ -22,8 +22,8 @@ public class BrainGraphView : GraphView
 		AddFeatures();
 		AddStyles();
 
-		RegisterOnElementRemovedCallback<ModuleGraphViewer>(DisableModule);
-		RegisterOnElementRemovedCallback<ModuleGraphViewer>(SyncRemovedModulesWithBrain);
+		RegisterOnElementRemovedCallback<ModuleNode>(DisableModule);
+		RegisterOnElementRemovedCallback<ModuleNode>(SyncRemovedModulesWithBrain);
 		graphViewChanged += OnGraphViewChanged;
 	}
 
@@ -43,6 +43,11 @@ public class BrainGraphView : GraphView
 				continue;
 			}
 
+			if(startPort.portType != port.portType && !startPort.portType.IsSubclassOf(port.portType))
+			{
+				continue;
+			}
+
 			compatiblePorts.Add(port);
 		}
 
@@ -53,17 +58,41 @@ public class BrainGraphView : GraphView
 	{
 		this.brain = brain;
 
-		List<ModuleGraphViewer> mainGraphModules = new();
+		List<ModuleNode> mainGraphModules = new();
 		for (int i = 0; i < brain.Modules.Count; i++)
 		{
-			ModuleGraphViewer.ModuleNodeType type = ModuleGraphViewer.ModuleNodeType.Mainstream;
+			ModuleNode.ModuleNodeType type = ModuleNode.ModuleNodeType.Mainstream;
 
-			ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(brain.Modules[i], type);
-			moduleGraphViewer.SetBrain(brain);
-			mainGraphModules.Add(moduleGraphViewer);
-			moduleGraphViewer.SetMainStatus(true);
-			AddElement(moduleGraphViewer);
-			EnableModule(moduleGraphViewer);
+			ModuleNode moduleNode = new ModuleNode(brain.Modules[i], type);
+			moduleNode.SetBrain(brain);
+			mainGraphModules.Add(moduleNode);
+			moduleNode.SetMainStatus(true);
+			AddElement(moduleNode);
+			EnableModule(moduleNode);
+
+			List<SubModuleNode> subModuleNodes = new();
+			foreach (var subModule in moduleNode.Module.SubModules)
+			{
+				SubModuleNode subModuleNode = new(subModule);
+				subModuleNodes.Add(subModuleNode);
+
+				subModuleNode.SetBrain(brain);
+				AddElement(subModuleNode);
+				moduleNode.EnableSubModule(subModuleNode);
+			}
+
+			foreach(var subModuleNode in subModuleNodes)
+			{
+				Edge edge = new Edge();
+				Port outputPort = subModuleNode.outputContainer.FirstChildOfType<Port>();
+				Port inputPort = moduleNode.AddInputPort();
+				edge.output = outputPort;
+				edge.input = inputPort;
+
+				outputPort.Connect(edge);
+				inputPort.Connect(edge);
+				AddElement(edge);
+			}
 		}
 
 		if(brain.Modules.Count >= 2)
@@ -84,9 +113,9 @@ public class BrainGraphView : GraphView
 
 		for (int i = 0; i < brain.UnconnectedModules.Count; i++)
 		{
-			ModuleGraphViewer.ModuleNodeType type = ModuleGraphViewer.ModuleNodeType.Side;
+			ModuleNode.ModuleNodeType type = ModuleNode.ModuleNodeType.Side;
 
-			ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(brain.UnconnectedModules[i], type);
+			ModuleNode moduleGraphViewer = new ModuleNode(brain.UnconnectedModules[i], type);
 			moduleGraphViewer.SetBrain(brain);
 			moduleGraphViewer.SetMainStatus(false);
 			AddElement(moduleGraphViewer);
@@ -96,10 +125,10 @@ public class BrainGraphView : GraphView
 
 	void AddStyles()
 	{
-		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Styles/Brain StyleSheet.uss");
+		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/Brain StyleSheet.uss");
 		styleSheets.Add(styleSheet);
 
-		StyleSheet nodestyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Styles/NodeStyles.uss");
+		StyleSheet nodestyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/NodeStyles.uss");
 		styleSheets.Add(nodestyleSheet);
 	}
 
@@ -132,7 +161,7 @@ public class BrainGraphView : GraphView
 						continue;
 					}
 
-					menuEvent.menu.AppendAction($"Add {type.ToString()}", (action) => CreateModuleFromType(type, action.eventInfo.localMousePosition));
+					menuEvent.menu.AppendAction($"Modules/{type.ToString()}", (action) => CreateModuleFromType(type, action.eventInfo.localMousePosition));
 				}
 			}
 		);
@@ -144,7 +173,7 @@ public class BrainGraphView : GraphView
 	{
 		Module module = ScriptableObject.CreateInstance(type) as Module;
 		AssetDatabase.AddObjectToAsset(module, brain);
-		ModuleGraphViewer moduleGraphViewer = new ModuleGraphViewer(module);
+		ModuleNode moduleGraphViewer = new ModuleNode(module);
 		moduleGraphViewer.SetBrain(brain);
 		moduleGraphViewer.Initialize(position);
 		
@@ -166,14 +195,14 @@ public class BrainGraphView : GraphView
 		EnableModule(moduleGraphViewer);
 	}
 
-	void EnableModule(ModuleGraphViewer moduleGraphViewer)
+	void EnableModule(ModuleNode moduleGraphViewer)
 	{
 		moduleGraphViewer.OnEnable();
 		moduleGraphViewer.RegisterGraphCallbacks(this);
 		graphViewChanged += moduleGraphViewer.OnGraphViewChanged;
 	}
-	void DisableModule(GraphElement graphElement) => DisableModule(graphElement as ModuleGraphViewer);
-	void DisableModule(ModuleGraphViewer moduleGraphViewer)
+	void DisableModule(GraphElement graphElement) => DisableModule(graphElement as ModuleNode);
+	void DisableModule(ModuleNode moduleGraphViewer)
 	{
 		graphViewChanged -= moduleGraphViewer.OnGraphViewChanged;
 		moduleGraphViewer.UnRegisterGraphCallbacks(this);
@@ -223,7 +252,7 @@ public class BrainGraphView : GraphView
 
 	void SyncRemovedModulesWithBrain(GraphElement elementToRemove)
 	{
-		if(elementToRemove is not ModuleGraphViewer moduleGraphViewer)
+		if(elementToRemove is not ModuleNode moduleGraphViewer)
 		{
 			return;
 		}

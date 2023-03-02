@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class SubModule: INode
+public abstract class SubModule : ScriptableObject, INode
 {
 	public Vector2 Position { get; set; }
 

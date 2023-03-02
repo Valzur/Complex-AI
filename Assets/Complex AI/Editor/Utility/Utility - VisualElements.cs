@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
@@ -30,5 +31,16 @@ public static partial class Utility
 		}
 
 		return parent as T;
+	}
+
+	public static bool ContainsElementOfType(this VisualElement visualElement, Type type)
+	{
+		foreach (var child in visualElement.Children())
+		{
+			if(child.GetType() == type)
+				return true;
+		}
+
+		return false;
 	}
 }

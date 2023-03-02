@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ActionModule : Module
 {
+	public override Type SubModuleType => typeof(ActionSubModule);
 	ActionSubModule currentAction;
 	protected override void Setup() => FindNextAction();
 
@@ -15,8 +18,10 @@ public class ActionModule : Module
 	void FindNextAction()
 	{
 		float highestActionPriority = 0;
-		foreach (var actionSubModule in SubModules as ActionSubModule[])
+		foreach (var subModule in SubModules.ToList())
 		{
+			ActionSubModule actionSubModule = subModule as ActionSubModule;
+			
 			IData[] requestedData = Memory.FindDataOfType(actionSubModule.RequiredDataTypes).ToArray();
 			if(actionSubModule.CanPerform() && actionSubModule.WouldPerform(requestedData) > highestActionPriority)
 			{

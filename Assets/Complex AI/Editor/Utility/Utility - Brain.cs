@@ -6,26 +6,33 @@ public static partial class Uitlity
 {
 	public static void Connect(this Brain brain, Module inputModule, Module outputModule)
 	{
-		brain.Modules.Remove(inputModule);
-		brain.UnconnectedModules.Remove(inputModule);
-		for (int i = 0; i < brain.Modules.Count; i++)
+		if(brain.Modules.Contains(inputModule))
 		{
-			if(brain.Modules[i] == outputModule)
+			brain.UnconnectedModules.Remove(outputModule);
+			for (int i = 0; i < brain.Modules.Count; i++)
 			{
-				brain.Modules.Insert(i, inputModule);
-				return;
+				if(brain.Modules[i] == inputModule)
+				{
+					brain.Modules.Insert(i, outputModule);
+					return;
+				}
+			}
+		}
+		else if(brain.Modules.Contains(outputModule))
+		{
+			brain.UnconnectedModules.Remove(inputModule);
+			for (int i = 0; i < brain.Modules.Count; i++)
+			{
+				if(brain.Modules[i] == outputModule)
+				{
+					brain.Modules.Insert(i+1, inputModule);
+					return;
+				}
 			}
 		}
 		
-		EditorUtility.SetDirty(inputModule);
-		EditorUtility.SetDirty(brain);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
-	}
-
-	public static void Disconnect(this Brain brain, Module thisModule, Module thatModule)
-	{
-
 	}
 
 	public static void Remove(this Brain brain, Module module)
