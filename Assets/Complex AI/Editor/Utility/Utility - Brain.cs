@@ -34,6 +34,11 @@ public static partial class Uitlity
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	}
+	public static void Disconnect(this Brain brain, Module module)
+	{
+		brain.Modules.Remove(module);
+		brain.UnconnectedModules.Add(module);
+	}
 
 	public static void Remove(this Brain brain, Module module)
 	{
@@ -46,6 +51,24 @@ public static partial class Uitlity
 		brain.UnconnectedModules.Remove(module);
 		AssetDatabase.RemoveObjectFromAsset(module);
 		EditorUtility.SetDirty(module);
+		EditorUtility.SetDirty(brain);
+		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
+	}
+
+	public static void Remove(this Brain brain, SubModule subModule)
+	{
+		foreach (var module in brain.Modules)
+		{
+			if(module.SubModules.Contains(subModule))
+			{
+				module.SubModules.Remove(subModule);
+				return;
+			}
+		}
+
+		AssetDatabase.RemoveObjectFromAsset(subModule);
+		EditorUtility.SetDirty(subModule);
 		EditorUtility.SetDirty(brain);
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();

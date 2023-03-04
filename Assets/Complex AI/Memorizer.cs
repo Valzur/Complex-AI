@@ -1,40 +1,92 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
 public class Memorizer
 {
-	Dictionary<Type, IData> AllData = new();
+	[SerializeReference] List<Data> AllData = new();
 
-	public void Memorize(IData data) => AllData[typeof(IData)] = data;
-	public void Memorize(List<IData> data)
+	public void Memorize(Data newData)
 	{
-		foreach (var item in data)
+		if(AllData.Exists((data) => data.GetType() == newData.GetType()))
+		{
+			Debug.LogError($"You should not be aading more than once instance of data, attempted to add: {newData.GetType()}");
+			return;
+		}
+
+		newData.Update();
+		AllData.Add(newData);
+	}
+	public void Memorize(List<Data> allData)
+	{
+		foreach (var data in allData)
 		{
 			Memorize(data);
 		}
 	}
 
-	public IData FindDataOfType(IData dataType)
+	public Data FindDataOfType(Type dataType)
 	{
-		Type type = dataType.GetType();
-		if(!AllData.ContainsKey(type))
+		Data foundData = AllData.FirstOrDefault((data) => data.GetType() == dataType);
+		if(foundData == default)
 		{
-			return dataType;
+			Memorize(System.Activator.CreateInstance(dataType) as Data);
 		}
 
-		return AllData[type];
+		return foundData;
 	}
-	public List<IData> FindDataOfType(params IData[] dataTypes)
+
+	public List<Data> FindDataOfType(params Type[] dataTypes)
 	{
-		List<IData> dataList = new();
+		List<Data> dataList = new();
 		
-		foreach (IData dataType in dataTypes)
+		foreach (Data data in AllData)
 		{
-			dataList.Add(FindDataOfType(dataType));
+			bool isDataNeeded = false;
+			foreach (Type dataType in dataTypes)
+			{
+				if(data.GetType() == dataType)
+				{
+					isDataNeeded = true;
+					break;
+				}
+			}
+
+			if(isDataNeeded)
+			{
+				dataList.Add(data);
+			}
 		}
+
+		if(dataList.Count != dataTypes.Length)
+		{
+			List<Type> missingTypes = new();
+
+			foreach (var type in dataTypes)
+			{
+				if(!dataList.Exists((data) => data.GetType() == type))
+				{
+					missingTypes.Add(type);
+				}
+			}
+
+			foreach (var missingType in missingTypes)
+			{
+				Data newData = System.Activator.CreateInstance(missingType) as Data;
+				dataList.Add(newData);
+				AllData.Add(newData);
+			}
+		}
+
+		List<Data> orderedDataList = new();
+		foreach (var type in dataTypes)
+		{
+			orderedDataList.Add(dataList.First((data) => data.GetType() == type));
+		}
+
+		dataList = orderedDataList;
 
 		return dataList;
 	}

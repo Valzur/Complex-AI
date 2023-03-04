@@ -7,8 +7,11 @@ using UnityEditor.Experimental.GraphView;
 public class SubModuleNode : NodeBase
 {
 	public SubModule SubModule;
+	protected override UnityEngine.Object RepresentedObject => SubModule;
+
 	public SubModuleNode(SubModule SubModule)
 	{
+		
 		this.SubModule = SubModule;
 		Initialize(SubModule.Position);
 		Draw();
@@ -50,7 +53,6 @@ public class SubModuleNode : NodeBase
 		VisualElement outputVisualElement = edge.output.parent;
 		if(outputVisualElement != outputContainer)
 		{
-			Debug.Log(outputVisualElement);
 			return;
 		}
 

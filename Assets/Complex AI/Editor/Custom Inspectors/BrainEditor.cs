@@ -1,5 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 
 [CustomEditor(typeof(Brain))]
 public class BrainEditor : Editor
@@ -17,7 +21,11 @@ public class BrainEditor : Editor
 
 	public override void OnInspectorGUI()
 	{
+		serializedObject.Update();
+		
 		GUI.enabled = false;
+
+		HashSet<Data> data = new();
 
 		EditorGUILayout.PropertyField(Memory);
 		EditorGUILayout.PropertyField(Modules);
@@ -30,6 +38,4 @@ public class BrainEditor : Editor
 			BrainGraphViewEditorWindow.Open(target as Brain);
 		}
 	}
-
-	
 }

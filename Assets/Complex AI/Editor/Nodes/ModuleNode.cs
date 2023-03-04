@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,6 +9,8 @@ using UnityEditor.Experimental.GraphView;
 public class ModuleNode : NodeBase
 {
 	BrainGraphView brainGraph;
+	protected override UnityEngine.Object RepresentedObject => Module;
+
 	public enum ModuleNodeType
 	{
 		Mainstream,
@@ -118,45 +121,52 @@ public class ModuleNode : NodeBase
 
 	public void HandleCreatedEdge(Edge edge)
 	{
-		VisualElement inputVisualElement = edge.input.parent;
-		VisualElement outputVisualElement = edge.output.parent;
-		if(inputVisualElement != inputContainer)
+		Edge connectingEdge = edge;
+
+		if(edge.InputOwnerNode() == this)
 		{
-			goto SecondCheck;
+			if(!this.IsMain && !(edge.OutputOwnerNode() as ModuleNode).IsMain)
+			{
+				return;
+			}
+
+			MarkLeftNodesMain(edge, true);
+		}
+		else if(edge.OutputOwnerNode() == this)
+		{
+			if(!this.IsMain && !(edge.InputOwnerNode() as ModuleNode).IsMain)
+			{
+				return;
+			}
+			
+			MarkRightNodesMain(edge, true);
+		}
+	}
+
+	void MarkLeftNodesMain(Edge edge, bool isMain = true)
+	{
+		ModuleNode outputModuleNode = edge.OutputOwnerNode() as ModuleNode;
+		if(!outputModuleNode.IsMain)
+		{
+			return;
 		}
 
-		if(outputVisualElement.parent.parent.parent.parent is not ModuleNode outputGraphViewer)
-		{
-			goto SecondCheck;
-		}
-
-		if(!outputGraphViewer.IsMain)
-		{
-			goto SecondCheck;
-		}
-
-		SetMainStatus(true);
-		brain.Connect(Module, outputGraphViewer.Module);
+		SetMainStatus(isMain);
+		brain.Connect(Module, outputModuleNode.Module);
 		return;
+	}
 
-		SecondCheck:
-		if(outputVisualElement != inputContainer)
-		{
-			return;
-		}
-
-		if(inputVisualElement.parent.parent.parent.parent is not ModuleNode inputGraphViewer)
-		{
-			return;
-		}
-
-		if(!inputGraphViewer.IsMain)
+	void MarkRightNodesMain(Edge edge, bool isMain = true)
+	{
+		ModuleNode inputModuleNode = edge.InputOwnerNode() as ModuleNode;
+		if(!inputModuleNode.IsMain)
 		{
 			return;
 		}
 		
-		SetMainStatus(true);
-		brain.Connect(inputGraphViewer.Module, Module);
+		SetMainStatus(isMain);
+		brain.Connect(inputModuleNode.Module, Module);
+		return;
 	}
 
 	public void HandleDisconnectedEdge(GraphElement elementToRemove)
@@ -166,26 +176,24 @@ public class ModuleNode : NodeBase
 			return;
 		}
 
-		if(edge.output.parent.parent.parent.parent.parent is not ModuleNode moduleGraphViewer)
+		if(edge.OutputOwnerNode() != this)
 		{
 			return;
 		}
 
-		if(moduleGraphViewer != this)
+		ModuleNode connectedModuleNode = this.outputContainer.FirstChildOfType<Port>().connections.FirstOrDefault().InputOwnerNode() as ModuleNode;
+		while(true)
 		{
-			return;
+			brain.Disconnect(connectedModuleNode.Module);
+			connectedModuleNode.SetMainStatus(false);
+			Edge rightConnection = connectedModuleNode.outputContainer.FirstChildOfType<Port>().connections.FirstOrDefault();
+			if(rightConnection == default)
+				break;
+			connectedModuleNode = rightConnection.InputOwnerNode() as ModuleNode;
 		}
 
-		ModuleNode connectedModuleGraphViewer = moduleGraphViewer;
-		int flag = 0;
-		while(connectedModuleGraphViewer is not null)
-		{
-			connectedModuleGraphViewer.SetMainStatus(false);
-			connectedModuleGraphViewer = connectedModuleGraphViewer.outputContainer.FirstChildOfType<Port>().connections.ElementAt(0).output.parent.parent.parent.parent.parent as ModuleNode;
-			flag ++;
-			if(flag >= 100) break;
-			Debug.Log("Ayo");
-		}
+		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
 	}
 
 	public void HandlePositionUpdate(GraphElement graphElement)
@@ -196,6 +204,16 @@ public class ModuleNode : NodeBase
 		}
 
 		Module.Position = GetPosition().position;
+	}
+
+	void HandleRemovedSubModule(GraphElement graphElement)
+	{
+		if(graphElement.GetType() != Module.SubModuleType)
+		{
+			return;
+		}
+
+		DisableSubModule(graphElement as SubModuleNode);
 	}
 
 	IManipulator CreateContextualMenu()
@@ -254,13 +272,5 @@ public class ModuleNode : NodeBase
 		subModuleNode.OnDisable();
 	}
 
-	void HandleRemovedSubModule(GraphElement graphElement)
-	{
-		if(graphElement.GetType() != Module.SubModuleType)
-		{
-			return;
-		}
 
-		DisableSubModule(graphElement as SubModuleNode);
-	}
 }

@@ -1,12 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveToRandomLocationAction : ActionSubModule
 {
-	public override bool CanPerform(params IData[] data) => true;
+	public override Type[] RequiredDataTypes => Array.Empty<Type>();
 
-	public override List<IData> Process(params IData[] data) => default;
+	public override bool CanPerform(params Data[] data) => true;
 
-	public override float WouldPerform(params IData[] data) => 1;
+	public override void Process(params Data[] data){}
+
+	public override float WouldPerform(params Data[] data) => 1;
 }

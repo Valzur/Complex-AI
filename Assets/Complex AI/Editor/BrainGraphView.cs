@@ -252,12 +252,12 @@ public class BrainGraphView : GraphView
 
 	void SyncRemovedModulesWithBrain(GraphElement elementToRemove)
 	{
-		if(elementToRemove is not ModuleNode moduleGraphViewer)
+		if(elementToRemove is not ModuleNode moduleNode)
 		{
 			return;
 		}
 
-		brain.Remove(moduleGraphViewer.Module);
+		brain.Remove(moduleNode.Module);
 	}
 
 	#region Registration

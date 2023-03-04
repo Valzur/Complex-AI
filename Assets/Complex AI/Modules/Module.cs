@@ -11,10 +11,16 @@ public abstract class Module: ScriptableObject, INode
 	protected Memorizer Memory;
 	public Vector2 Position { get; set; }
 
-	public void Initialize(Memorizer Memorizer)
+	public void Initialize(Transform ownerTransform, Memorizer Memorizer)
 	{
 		this.name = GetType().ToString();
 		this.Memory = Memorizer;
+		
+		foreach (var subModule in SubModules)
+		{
+			subModule.Initialize(ownerTransform);
+		}
+
 		Setup();
 	}
 
@@ -24,9 +30,8 @@ public abstract class Module: ScriptableObject, INode
 	{
 		foreach (var subModule in SubModules)
 		{
-			List<IData> requestedData = Memory.FindDataOfType(subModule.RequiredDataTypes);
-			List<IData> outputData = subModule.Process(requestedData.ToArray());
-			Memory.Memorize(outputData);
+			List<Data> requestedData = Memory.FindDataOfType(subModule.RequiredDataTypes);
+			subModule.Process(requestedData.ToArray());
 		}
 	}
 }

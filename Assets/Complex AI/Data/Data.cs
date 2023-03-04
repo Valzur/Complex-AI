@@ -3,14 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IData : IEqualityComparer
+[Serializable]
+public abstract class Data : IEqualityComparer
 {
-	float LastUpdated { get; set; }
-	Guid GUID { get; set; }
+	[SerializeField] public float LastUpdated { get; protected set; }
+	protected Guid GUID { get; set; } = Guid.NewGuid();
+
 
 	bool IEqualityComparer.Equals(object thisObject, object otherObject)
 	{
-		if(otherObject is IData dataObject)
+		if(otherObject is Data dataObject)
 		{
 			return dataObject.GetHashCode() == GetHashCode();
 		}
@@ -20,5 +22,5 @@ public interface IData : IEqualityComparer
 
 	int IEqualityComparer.GetHashCode(object obj) => HashCode.Combine(LastUpdated, GUID);
 
-	void Update() => LastUpdated = Time.time;
+	public void Update() => LastUpdated = Time.time;
 }

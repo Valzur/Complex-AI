@@ -13,6 +13,8 @@ public class ModuleEditor: Editor
 
 	public override void OnInspectorGUI()
 	{
+		serializedObject.Update();
+		
 		GUI.enabled = false;
 
 		EditorGUILayout.PropertyField(SubModules);
@@ -37,6 +39,7 @@ public class ModuleEditor: Editor
 			DeleteAsset();
 		}
 	}
+
 
 	void DeleteAsset()
 	{

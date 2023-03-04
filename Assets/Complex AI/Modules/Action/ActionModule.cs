@@ -10,9 +10,8 @@ public class ActionModule : Module
 
 	public override void Process()
 	{
-		List<IData> requestedData = Memory.FindDataOfType(currentAction.RequiredDataTypes);
-		List<IData> outputData = currentAction.Process(requestedData.ToArray());
-		Memory.Memorize(outputData);
+		List<Data> requestedData = Memory.FindDataOfType(currentAction.RequiredDataTypes);
+		currentAction.Process(requestedData.ToArray());
 	}
 
 	void FindNextAction()
@@ -22,15 +21,18 @@ public class ActionModule : Module
 		{
 			ActionSubModule actionSubModule = subModule as ActionSubModule;
 			
-			IData[] requestedData = Memory.FindDataOfType(actionSubModule.RequiredDataTypes).ToArray();
-			if(actionSubModule.CanPerform() && actionSubModule.WouldPerform(requestedData) > highestActionPriority)
+			Data[] requestedData = Memory.FindDataOfType(actionSubModule.RequiredDataTypes).ToArray();
+			if(actionSubModule.CanPerform(requestedData) && actionSubModule.WouldPerform(requestedData) > highestActionPriority)
 			{
 				currentAction = actionSubModule;
 				highestActionPriority = actionSubModule.WouldPerform(requestedData);
 			}
 		}
 
-		currentAction.OnFinished += RemoveCurrentAndFindNextAction;
+		if(currentAction)
+		{
+			currentAction.OnFinished += RemoveCurrentAndFindNextAction;
+		}
 	}
 
 	void RemoveCurrentAndFindNextAction()

@@ -7,15 +7,15 @@ using UnityEngine;
 public class Brain : ScriptableObject
 {
 	public List<Module> Modules = new();
-	[SerializeField] Memorizer Memory;
+	[SerializeField] Memorizer Memory = new();
 	[SerializeField] List<Module> unconnectedModules = new();
 	public List<Module> UnconnectedModules => unconnectedModules;
 
-	public void InitializeModules()
+	public void InitializeModules(Transform ownerTransform)
 	{
 		foreach (var module in Modules)
 		{
-			module.Initialize(Memory);
+			module.Initialize(ownerTransform, Memory);
 		}
 	}
 

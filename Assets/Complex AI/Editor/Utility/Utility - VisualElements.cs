@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 
 public static partial class Utility
 {
@@ -42,5 +43,15 @@ public static partial class Utility
 		}
 
 		return false;
+	}
+
+	public static Node InputOwnerNode(this Edge edge)
+	{
+		return edge.input.parent.parent.parent.parent.parent as Node;
+	}
+
+	public static Node OutputOwnerNode(this Edge edge)
+	{
+		return edge.output.parent.parent.parent.parent.parent as Node;
 	}
 }
