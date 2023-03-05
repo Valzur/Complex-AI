@@ -45,6 +45,9 @@ public class SubModuleNode : NodeBase
 		}
 
 		SubModule.Position = GetPosition().position;
+		EditorUtility.SetDirty(SubModule);
+		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
 	}
 	
 	public void HandleConnectedSubModule(Edge edge)

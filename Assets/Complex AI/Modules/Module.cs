@@ -9,7 +9,8 @@ public abstract class Module: ScriptableObject, INode
 	public virtual Type SubModuleType => typeof(SubModule);
 	public List<SubModule> SubModules = new();
 	protected Memorizer Memory;
-	public Vector2 Position { get; set; }
+	[HideInInspector] [SerializeField] Vector2 position;
+	public Vector2 Position { get => position; set => position = value; }
 
 	public void Initialize(Transform ownerTransform, Memorizer Memorizer)
 	{

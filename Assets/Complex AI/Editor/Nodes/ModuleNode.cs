@@ -63,10 +63,14 @@ public class ModuleNode : NodeBase
 
 	void Draw()
 	{
+		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/ModuleNodeStyles.uss");
+		styleSheets.Add(styleSheet);
+
 		title = Module.GetType().ToString();
 
 		Button addPortButton = new Button{ text = "Add SubModule" };
 		addPortButton.clicked += () => AddInputPort();
+
 		Add(addPortButton);
 		subModuleContainer = new Foldout();
 		Add(subModuleContainer);
@@ -204,6 +208,9 @@ public class ModuleNode : NodeBase
 		}
 
 		Module.Position = GetPosition().position;
+		EditorUtility.SetDirty(Module);
+		AssetDatabase.SaveAssets();
+		AssetDatabase.Refresh();
 	}
 
 	void HandleRemovedSubModule(GraphElement graphElement)

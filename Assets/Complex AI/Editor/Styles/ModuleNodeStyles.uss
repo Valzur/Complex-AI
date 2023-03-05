@@ -1,0 +1,9 @@
+ModuleNode #input
+{
+	background-color: white;
+}
+
+ModuleNode #contentContainer
+{
+	background-color: black;
+}

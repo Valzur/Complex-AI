@@ -4,7 +4,8 @@ using UnityEngine;
 
 public abstract class SubModule : ScriptableObject, INode
 {
-	public Vector2 Position { get; set; }
+	[HideInInspector] [SerializeField] Vector2 position;
+	public Vector2 Position { get => position; set => position = value; }
 
 	public abstract Type[] RequiredDataTypes { get; }
 
