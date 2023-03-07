@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Name: Brain
   m_EditorClassIdentifier: 
   Modules:
-  - {fileID: 5515969175976736708}
+  - {fileID: 4445720156796731247}
   - {fileID: -7508168276932347971}
   - {fileID: 8075471020039089961}
   Memory:
@@ -89,6 +89,21 @@ MonoBehaviour:
       type: {class: TargetData, ns: , asm: Assembly-CSharp}
       data:
         transform: {fileID: 0}
+--- !u!114 &4445720156796731247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 751888143d6c10e49962a71b943c9977, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubModules:
+  - {fileID: 5926833840170165259}
+  position: {x: 378, y: -35}
 --- !u!114 &5515969175976736708
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,7 +118,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SubModules:
   - {fileID: -5085856753487447230}
+  - {fileID: -5085856753487447230}
   position: {x: 407, y: -35}
+--- !u!114 &5926833840170165259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f5a530fdd593e4fa429d1282650680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  position: {x: 166, y: 132}
+  detectionRange: 0
 --- !u!114 &8075471020039089961
 MonoBehaviour:
   m_ObjectHideFlags: 0

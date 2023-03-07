@@ -1,17 +1,61 @@
 using System;
-using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 
 public class SubModuleNode : NodeBase
 {
+	public static Type Default
+	{
+		get
+		{
+			foreach (var type in typeof(SubModuleNode).Assembly.GetTypes())
+			{
+				if(!type.IsSubclassOf(typeof(SubModuleNode)))
+				{
+					continue;
+				}
+
+				if(type.IsDefined(typeof(DefaultSubModuleNodeAttribute), false))
+				{
+					return type;
+				}
+			}
+
+			return typeof(SubModuleNode);
+		}
+	}
+	public static Type CustomFor(Type subModuleType)
+	{
+		foreach (var type in typeof(SubModuleNode).Assembly.GetTypes())
+		{
+			if(!type.IsSubclassOf(typeof(SubModuleNode)))
+			{
+				continue;
+			}
+
+			CustomSubModuleNodeAttribute attribute = Attribute.GetCustomAttribute(type.GetType(), typeof(CustomSubModuleNodeAttribute)) as CustomSubModuleNodeAttribute;
+			if(attribute is null)
+			{
+				continue;
+			}
+
+			if(attribute.Type != subModuleType)
+			{
+				continue;
+			}
+
+			return type;
+		}
+
+		return null;
+	}
+
 	public SubModule SubModule;
 	protected override UnityEngine.Object RepresentedObject => SubModule;
 
 	public SubModuleNode(SubModule SubModule)
 	{
-		
 		this.SubModule = SubModule;
 		Initialize(SubModule.Position);
 		Draw();
@@ -19,16 +63,16 @@ public class SubModuleNode : NodeBase
 
 	public override void RegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
-		brainGraphView.RegisterOnElementMovedCallback<SubModuleNode>(HandlePositionUpdate);
-		brainGraphView.onEdgeCreatedCallback.AddListener(HandleConnectedSubModule);
+		brainGraphView.RegisterOnElementMovedCallback<SubModuleNode>(SyncPositionUpdateWithBrain);
+		brainGraphView.onEdgeCreatedCallback.AddListener(AddConnectedSubModuleToBrain);
 	}
 	public override void UnRegisterGraphCallbacks(BrainGraphView brainGraphView)
 	{
-		brainGraphView.onEdgeCreatedCallback.RemoveListener(HandleConnectedSubModule);
-		brainGraphView.UnRegisterOnElementMovedCallback<SubModuleNode>(HandlePositionUpdate);
+		brainGraphView.onEdgeCreatedCallback.RemoveListener(AddConnectedSubModuleToBrain);
+		brainGraphView.UnRegisterOnElementMovedCallback<SubModuleNode>(SyncPositionUpdateWithBrain);
 	}
 	
-	void Draw()
+	protected virtual void Draw()
 	{
 		title = SubModule.GetType().ToString();
 
@@ -37,7 +81,7 @@ public class SubModuleNode : NodeBase
 		outputContainer.Add(outputPort);
 	}
 	
-	public void HandlePositionUpdate(GraphElement graphElement)
+	void SyncPositionUpdateWithBrain(GraphElement graphElement)
 	{
 		if(graphElement != this)
 		{
@@ -50,7 +94,7 @@ public class SubModuleNode : NodeBase
 		AssetDatabase.Refresh();
 	}
 	
-	public void HandleConnectedSubModule(Edge edge)
+	void AddConnectedSubModuleToBrain(Edge edge)
 	{
 		VisualElement inputVisualElement = edge.input.parent;
 		VisualElement outputVisualElement = edge.output.parent;
@@ -67,8 +111,14 @@ public class SubModuleNode : NodeBase
 		moduleNode.Module.SubModules.Add(SubModule);
 	}
 
-	public void HandleDisconnectedSubModule(GraphElement graphElement)
+	public static SubModuleNode CreateModuleNodeFromSubModule(SubModule subModule)
 	{
-		
+		Type subModuleNodeType = CustomFor(subModule.GetType());
+		if(subModuleNodeType is null)
+		{
+			subModuleNodeType = Default;
+		}
+
+		return System.Activator.CreateInstance(subModuleNodeType, subModule as object) as SubModuleNode;
 	}
 }

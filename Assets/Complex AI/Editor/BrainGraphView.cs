@@ -61,9 +61,7 @@ public class BrainGraphView : GraphView
 		List<ModuleNode> mainGraphModules = new();
 		for (int i = 0; i < brain.Modules.Count; i++)
 		{
-			ModuleNode.ModuleNodeType type = ModuleNode.ModuleNodeType.Mainstream;
-
-			ModuleNode moduleNode = new ModuleNode(brain.Modules[i], type);
+			ModuleNode moduleNode = ModuleNode.CreateModuleNodeFromModule(brain.Modules[i]);
 			moduleNode.SetBrain(brain);
 			mainGraphModules.Add(moduleNode);
 			moduleNode.SetMainStatus(true);
@@ -73,7 +71,7 @@ public class BrainGraphView : GraphView
 			List<SubModuleNode> subModuleNodes = new();
 			foreach (var subModule in moduleNode.Module.SubModules)
 			{
-				SubModuleNode subModuleNode = new(subModule);
+				SubModuleNode subModuleNode = SubModuleNode.CreateModuleNodeFromSubModule(subModule);
 				subModuleNodes.Add(subModuleNode);
 
 				subModuleNode.SetBrain(brain);
@@ -113,9 +111,7 @@ public class BrainGraphView : GraphView
 
 		for (int i = 0; i < brain.UnconnectedModules.Count; i++)
 		{
-			ModuleNode.ModuleNodeType type = ModuleNode.ModuleNodeType.Side;
-
-			ModuleNode moduleGraphViewer = new ModuleNode(brain.UnconnectedModules[i], type);
+			ModuleNode moduleGraphViewer = ModuleNode.CreateModuleNodeFromModule(brain.UnconnectedModules[i]);
 			moduleGraphViewer.SetBrain(brain);
 			moduleGraphViewer.SetMainStatus(false);
 			AddElement(moduleGraphViewer);
@@ -125,6 +121,9 @@ public class BrainGraphView : GraphView
 
 	void AddStyles()
 	{
+		StyleSheet moduleNodeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/ModuleNodeStyles.uss");
+		styleSheets.Add(moduleNodeStyleSheet);
+
 		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/Brain StyleSheet.uss");
 		styleSheets.Add(styleSheet);
 
@@ -173,9 +172,10 @@ public class BrainGraphView : GraphView
 	{
 		Module module = ScriptableObject.CreateInstance(type) as Module;
 		AssetDatabase.AddObjectToAsset(module, brain);
-		ModuleNode moduleGraphViewer = new ModuleNode(module);
-		moduleGraphViewer.SetBrain(brain);
-		moduleGraphViewer.Initialize(position);
+
+		ModuleNode moduleNode = ModuleNode.CreateModuleNodeFromModule(module);
+		moduleNode.SetBrain(brain);
+		moduleNode.Initialize(position);
 		
 		if(this.graphElements.Count() == 0)
 		{
@@ -189,10 +189,10 @@ public class BrainGraphView : GraphView
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 	
-		moduleGraphViewer.SetMainStatus(this.graphElements.Count() == 0);
+		moduleNode.SetMainStatus(this.graphElements.Count() == 0);
 		
-		AddElement(moduleGraphViewer);
-		EnableModule(moduleGraphViewer);
+		AddElement(moduleNode);
+		EnableModule(moduleNode);
 	}
 
 	void EnableModule(ModuleNode moduleGraphViewer)

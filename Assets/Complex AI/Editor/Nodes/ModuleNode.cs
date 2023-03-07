@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,25 +7,66 @@ using UnityEditor.Experimental.GraphView;
 
 public class ModuleNode : NodeBase
 {
+	public static Type Default
+	{
+		get
+		{
+			foreach (var type in typeof(ModuleNode).Assembly.GetTypes())
+			{
+				if(!type.IsSubclassOf(typeof(ModuleNode)))
+				{
+					continue;
+				}
+
+				if(type.IsDefined(typeof(DefaultModuleNodeAttribute), false))
+				{
+					return type;
+				}
+			}
+
+			return typeof(ModuleNode);
+		}
+	}
+	public static Type CustomFor(Type moduleType)
+	{
+		foreach (var type in typeof(ModuleNode).Assembly.GetTypes())
+		{
+			if(!type.IsSubclassOf(typeof(ModuleNode)))
+			{
+				continue;
+			}
+
+			CustomModuleNodeAttribute attribute = Attribute.GetCustomAttribute(type.GetType(), typeof(CustomModuleNodeAttribute)) as CustomModuleNodeAttribute;
+			if(attribute is null)
+			{
+				continue;
+			}
+
+			if(attribute.Type != moduleType)
+			{
+				continue;
+			}
+
+			return type;
+		}
+
+		return null;
+	}
+
 	BrainGraphView brainGraph;
 	protected override UnityEngine.Object RepresentedObject => Module;
-
-	public enum ModuleNodeType
-	{
-		Mainstream,
-		Side
-	}
 	
 	public bool IsMain { get; private set; }
 	public Module Module { get; private set; }
 	VisualElement subModuleContainer;
 
-	public ModuleNode(Module module, ModuleNodeType type = ModuleNodeType.Mainstream)
+	public ModuleNode(Module module)
 	{
 		this.Module = module;
 		Initialize(module.Position);
 		this.AddManipulator(CreateContextualMenu());
 		Draw();
+		mainContainer.name = "mainContainer";
 	}
 
 	public override void RegisterGraphCallbacks(BrainGraphView brainGraphView)
@@ -61,18 +101,16 @@ public class ModuleNode : NodeBase
 		return changes;
 	}
 
-	void Draw()
+	protected virtual void Draw()
 	{
-		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/ModuleNodeStyles.uss");
-		styleSheets.Add(styleSheet);
-
 		title = Module.GetType().ToString();
 
 		Button addPortButton = new Button{ text = "Add SubModule" };
 		addPortButton.clicked += () => AddInputPort();
-
+		
 		Add(addPortButton);
 		subModuleContainer = new Foldout();
+		subModuleContainer.name = "subModuleContainer";
 		Add(subModuleContainer);
 
 		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(Module));
@@ -87,7 +125,7 @@ public class ModuleNode : NodeBase
 		outputContainer.Add(outputPort);
 	}
 
-	public Port AddInputPort()
+	public virtual Port AddInputPort()
 	{
 		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, Module.SubModuleType);
 		inputPort.portName = string.Empty;
@@ -99,7 +137,7 @@ public class ModuleNode : NodeBase
 		return inputPort;
 	}
 
-	void RemoveInputPort(Port port)
+	protected void RemoveInputPort(Port port)
 	{
 		while(port.connections.Count() != 0)
 		{
@@ -257,7 +295,8 @@ public class ModuleNode : NodeBase
 	{
 		SubModule subModule = ScriptableObject.CreateInstance(type) as SubModule;
 		AssetDatabase.AddObjectToAsset(subModule, brain);
-		SubModuleNode subModuleNode = new SubModuleNode(subModule);
+		SubModuleNode subModuleNode = SubModuleNode.CreateModuleNodeFromSubModule(subModule);
+
 		subModuleNode.SetBrain(brain);
 		subModuleNode.Initialize(position);
 		
@@ -272,12 +311,21 @@ public class ModuleNode : NodeBase
 		brainGraph.graphViewChanged += subModuleNode.OnGraphViewChanged;
 	}
 
-	void DisableSubModule(SubModuleNode subModuleNode)
+	protected void DisableSubModule(SubModuleNode subModuleNode)
 	{
 		brainGraph.graphViewChanged -= subModuleNode.OnGraphViewChanged;
 		subModuleNode.UnRegisterGraphCallbacks(brainGraph);
 		subModuleNode.OnDisable();
 	}
 
+	public static ModuleNode CreateModuleNodeFromModule(Module module)
+	{
+		Type moduleNodeType = CustomFor(module.GetType());
+		if(moduleNodeType is null)
+		{
+			moduleNodeType = Default;
+		}
 
+		return System.Activator.CreateInstance(moduleNodeType, module as object) as ModuleNode;
+	}
 }
