@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// An Action that lasts for 1 frame
@@ -21,5 +21,5 @@ public class IdleAction : ActionSubModule
 		}
 	}
 
-	public override float WouldPerform(params Data[] requestedData) => 0.0000000000000000000001f;
+	public override float WouldPerform(params Data[] requestedData) => float.Epsilon;
 }
