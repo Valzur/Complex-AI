@@ -16,6 +16,7 @@ public class SubModuleEditor : Editor
 		}
 
 		serializedObject.ApplyModifiedProperties();
+
 	}
 
 	void DeleteAsset()
@@ -25,5 +26,10 @@ public class SubModuleEditor : Editor
 			Brain brain = AssetDatabase.LoadAssetAtPath(AssetDatabase.GetAssetPath(target), typeof(Brain)) as Brain;
 			brain.Remove(target as SubModule);
 		}
+	}
+
+	void SaveToPrefab()
+	{
+		
 	}
 }

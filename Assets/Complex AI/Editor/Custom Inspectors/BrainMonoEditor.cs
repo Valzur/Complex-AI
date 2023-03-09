@@ -10,6 +10,11 @@ public class BrainMonoEditor: Editor
 
 		base.OnInspectorGUI();
 
+		if(GUILayout.Button("Open Brain Editor"))
+		{
+			BrainGraphViewEditorWindow.Open((target as BrainMono).brain);
+		}
+
 		serializedObject.ApplyModifiedProperties();
 	}
 }

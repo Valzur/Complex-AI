@@ -1,25 +1,21 @@
-/* CONTAINERS */
-
-.ds-node_extension-container
+ModuleNode  #selection-border, SubModuleNode #selection-border
 {
-	background-color: #1D1D1E;
-	padding: 8px;
+	color: black;
+	border-width: 0;
+	border-radius: 0;
 }
 
-.ds-node_custom-data-containers
+ModuleNode #node-border, SubModuleNode #node-border
 {
-	background-color: #212325;
-	border-radius: 4px;
-	padding: 8px;
+	background-color: #3F3F3F;
+	margin: 0;
+	border-width: 0;
+	border-radius: 3;
 }
 
-/* INPUTS */
-
-.ds-node_textfield > .unity-text-field_input
+ModuleNode #title-label, SubModuleNode #title-label
 {
-	background-color: #1D1D1E;
-	border-color: #27292C;
-	border-radius: 4px;
-	min-width: 160px;
-	padding: 8px;
+	font-size: 12;
+	margin: 10;
+	align: middle-center;
 }

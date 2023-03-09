@@ -66,7 +66,6 @@ public class ModuleNode : NodeBase
 		Initialize(module.Position);
 		this.AddManipulator(CreateContextualMenu());
 		Draw();
-		mainContainer.name = "mainContainer";
 	}
 
 	public override void RegisterGraphCallbacks(BrainGraphView brainGraphView)
@@ -102,7 +101,7 @@ public class ModuleNode : NodeBase
 	}
 
 	protected virtual void Draw()
-	{
+	{	
 		title = Module.GetType().ToString();
 
 		Button addPortButton = new Button{ text = "Add SubModule" };
@@ -130,6 +129,7 @@ public class ModuleNode : NodeBase
 		Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, Module.SubModuleType);
 		inputPort.portName = string.Empty;
 		Button deletePortButton = new Button(){ text = "X" };
+		deletePortButton.name = "deletePortButton";
 		inputPort.Add(deletePortButton);
 		deletePortButton.clicked += () => RemoveInputPort(inputPort);
 

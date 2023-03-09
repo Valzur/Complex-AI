@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93a3ad8ce17634e48b9caea427a16958, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 731, y: 264}
+  position: {x: 713, y: 240}
 --- !u!114 &-7508168276932347971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,8 +132,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82f5a530fdd593e4fa429d1282650680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 166, y: 132}
-  detectionRange: 0
+  position: {x: 212, y: 145}
+  detectionRange: 10
 --- !u!114 &8075471020039089961
 MonoBehaviour:
   m_ObjectHideFlags: 0

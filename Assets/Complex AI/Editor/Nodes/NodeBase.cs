@@ -3,14 +3,16 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 
-public abstract class NodeBase : Node
+public class NodeBase : Node
 {
+	public new class UxmlFactory : UxmlFactory<NodeBase, UxmlTraits> {}
 	protected Brain brain;
 	protected virtual Object RepresentedObject { get; }
 
 	public NodeBase()
 	{
 		this.RegisterCallback<MouseDownEvent>(ShowInspectorWindow);
+		titleButtonContainer.Remove(m_CollapseButton);
 	}
 
 	public void SetBrain(Brain brain) => this.brain = brain;
@@ -32,6 +34,6 @@ public abstract class NodeBase : Node
 			return;
 		}
 
-		Selection.SetActiveObjectWithContext(RepresentedObject, null);
+		EditorUtility.OpenPropertyEditor(RepresentedObject);
 	}
 }

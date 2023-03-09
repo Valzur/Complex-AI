@@ -124,6 +124,9 @@ public class BrainGraphView : GraphView
 		StyleSheet moduleNodeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/ModuleNodeStyles.uss");
 		styleSheets.Add(moduleNodeStyleSheet);
 
+		StyleSheet subModuleNodeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/SubModuleNodeStyles.uss");
+		styleSheets.Add(subModuleNodeStyleSheet);
+
 		StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Complex AI/Editor/Styles/Brain StyleSheet.uss");
 		styleSheets.Add(styleSheet);
 

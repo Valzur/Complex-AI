@@ -1,13 +1,26 @@
 ModuleNode
 {
 	background-color: #3F3F3F;
-	border-width: 1;
-	border-radius: 0;
+	border-width: 0;
+	border-radius: 3;
 }
 
-ModuleNode #mainContainer
+ModuleNode Button
 {
-	--unity-metrics-default-border_radius: 0;
-	padding: 0;
-	background-color: white;
+	border-radius: 0;
+	border-color: #3F3F3F;
+}
+
+ModuleNode Button:hover
+{
+	border-radius: 0;
+	border-color: #3F3F3F;
+	background-color: green;
+}
+
+#deletePortButton:hover
+{
+	border-radius: 0;
+	border-color: #3F3F3F;
+	background-color: brown;
 }
