@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public abstract class Module: ScriptableObject, INode
+public abstract class Module: ScriptableObject, INode, ICloneable
 {
 	public virtual Type SubModuleType => typeof(SubModule);
 	public List<SubModule> SubModules = new();
@@ -35,4 +35,17 @@ public abstract class Module: ScriptableObject, INode
 			subModule.Process(requestedData.ToArray());
 		}
 	}
+
+	public object Clone()
+	{
+		Module newModule = ScriptableObject.CreateInstance(GetType()) as Module;
+		Populate(newModule);
+		return newModule;
+	}
+
+	///</summary>
+	/// Implement if you have any serialized data that needs to be 
+	/// carried over during runtime (ie: range, length)
+	///</summary>
+	protected virtual void Populate(Module newModule){}
 }

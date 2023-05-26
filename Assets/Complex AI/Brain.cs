@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,5 +80,23 @@ public class Brain : ScriptableObject
 				}
 			}
 		}
+	}
+
+	public static Brain Copy(Brain other)
+	{
+		Brain brain = ScriptableObject.CreateInstance<Brain>();
+
+		other.Modules.ForEach((module) => 
+		{
+			Module newModule = (module as Module).Clone() as Module;
+			module.SubModules.ForEach((subModule) => 
+			{
+				SubModule newSubModule = (subModule as SubModule).Clone() as SubModule;
+				newModule.SubModules.Add(newSubModule);
+			});
+
+			brain.Modules.Add(newModule);
+		});
+		return brain;
 	}
 }

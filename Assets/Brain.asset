@@ -1,33 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8228886932100401778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93a3ad8ce17634e48b9caea427a16958, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  position: {x: 713, y: 240}
---- !u!114 &-7508168276932347971
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df8f6136b278ddc41ab677f0aed576b6, type: 3}
-  m_Name: RecognitionModule
-  m_EditorClassIdentifier: 
-  SubModules: []
-  position: {x: 696, y: -35}
---- !u!114 &-5085856753487447230
+--- !u!114 &-8063625501581034941
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -39,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82f5a530fdd593e4fa429d1282650680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 187, y: 132}
+  position: {x: 59, y: 306}
   detectionRange: 100
---- !u!114 &-596736263981174456
+--- !u!114 &-4000115268734237754
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -53,10 +26,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39874feb3683b7f43934cd77e82d7858, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 713, y: 108}
+  position: {x: 580, y: 359}
   speed: 10
   reactRange: 5
-  stopRange: 0
+  stopRange: 1
+--- !u!114 &-3633759627705538042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19dde5087daa89645aa4cf3c1f93c270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubModules:
+  - {fileID: -4000115268734237754}
+  - {fileID: 2832979563823969148}
+  position: {x: 767, y: 180}
+--- !u!114 &-977356742551227405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8f6136b278ddc41ab677f0aed576b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubModules: []
+  position: {x: 469, y: 180}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,26 +73,29 @@ MonoBehaviour:
   m_Name: Brain
   m_EditorClassIdentifier: 
   Modules:
-  - {fileID: 4445720156796731247}
-  - {fileID: -7508168276932347971}
-  - {fileID: 8075471020039089961}
+  - {fileID: 7168092929137527236}
+  - {fileID: -977356742551227405}
+  - {fileID: -3633759627705538042}
   Memory:
-    AllData:
-    - rid: 3244055288112218112
-    - rid: 3244055288112218113
+    AllData: []
   unconnectedModules: []
   references:
     version: 2
-    RefIds:
-    - rid: 3244055288112218112
-      type: {class: AIData, ns: , asm: Assembly-CSharp}
-      data:
-        rootTransform: {fileID: 0}
-    - rid: 3244055288112218113
-      type: {class: TargetData, ns: , asm: Assembly-CSharp}
-      data:
-        transform: {fileID: 0}
---- !u!114 &4445720156796731247
+    RefIds: []
+--- !u!114 &2832979563823969148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93a3ad8ce17634e48b9caea427a16958, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  position: {x: 580, y: 464}
+--- !u!114 &7168092929137527236
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -102,51 +108,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SubModules:
-  - {fileID: 5926833840170165259}
-  position: {x: 378, y: -35}
---- !u!114 &5515969175976736708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 751888143d6c10e49962a71b943c9977, type: 3}
-  m_Name: PerceptionModule
-  m_EditorClassIdentifier: 
-  SubModules:
-  - {fileID: -5085856753487447230}
-  - {fileID: -5085856753487447230}
-  position: {x: 407, y: -35}
---- !u!114 &5926833840170165259
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82f5a530fdd593e4fa429d1282650680, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  position: {x: 212, y: 145}
-  detectionRange: 10
---- !u!114 &8075471020039089961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19dde5087daa89645aa4cf3c1f93c270, type: 3}
-  m_Name: ActionModule
-  m_EditorClassIdentifier: 
-  SubModules:
-  - {fileID: -596736263981174456}
-  - {fileID: -8228886932100401778}
-  position: {x: 971, y: -35}
+  - {fileID: -8063625501581034941}
+  position: {x: 222, y: 180}

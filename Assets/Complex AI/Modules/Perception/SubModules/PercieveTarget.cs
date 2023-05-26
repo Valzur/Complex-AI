@@ -5,12 +5,11 @@ public class PercieveTarget : PerceptionSubModule
 {
 	[SerializeField] float detectionRange;
 
-	public override Type[] RequiredDataTypes => new Type[]{ typeof(AIData), typeof(TargetData) };
+	public override Type[] RequiredDataTypes => new Type[]{ typeof(TargetData) };
 
 	public override void Process(params Data[] requestedData)
 	{
-		AIData aIData = requestedData[0] as AIData;
-		TargetData targetData = requestedData[1] as TargetData;
+		TargetData targetData = requestedData[0] as TargetData;
 
 		Collider[] collidersInRange = Physics.OverlapSphere(ownerTransform.position, detectionRange);
 		foreach (var collider in collidersInRange)
@@ -21,5 +20,10 @@ public class PercieveTarget : PerceptionSubModule
 				break;
 			}
 		}
+	}
+
+	protected override void Populate(SubModule newSubModule)
+	{
+		(newSubModule as PercieveTarget).detectionRange = detectionRange;
 	}
 }

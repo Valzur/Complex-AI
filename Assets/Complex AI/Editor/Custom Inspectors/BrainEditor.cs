@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 
 [CustomEditor(typeof(Brain))]
 public class BrainEditor : Editor
 {
-	SerializedProperty Modules;
 	SerializedProperty Memory;
+	SerializedProperty Modules;
 	SerializedProperty unconnectedModules;
 
 	void OnEnable()
 	{
-		Modules = serializedObject.FindProperty("Modules");
 		Memory = serializedObject.FindProperty("Memory");
+		Modules = serializedObject.FindProperty("Modules");
 		unconnectedModules = serializedObject.FindProperty("unconnectedModules");
 	}
 
@@ -24,8 +22,6 @@ public class BrainEditor : Editor
 		serializedObject.Update();
 		
 		GUI.enabled = false;
-
-		HashSet<Data> data = new();
 
 		EditorGUILayout.PropertyField(Memory);
 		EditorGUILayout.PropertyField(Modules);

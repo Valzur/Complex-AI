@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,14 +6,18 @@ public class BrainMono: MonoBehaviour
 {
 	[Tooltip("Use a rate of Infinity for every frame execution")]
 	[SerializeField] float updateRate;
-	public Brain brain;
+	[SerializeField] Brain brainPrefab;
+	public Brain BrainPrefab => brainPrefab;
+	[SerializeField] Brain brain;
 	Coroutine UpdateRoutineReference;
 	UnityEvent updateEveryFrame = new();
 
 	void Awake()
 	{
+		brain = Brain.Copy(BrainPrefab);
 		brain.InitializeModules(transform);
 	}
+
 	void OnEnable() => Activate();
 	void OnDisable() => DeActivate();
 
